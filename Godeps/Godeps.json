@@ -3,7 +3,7 @@
 	"GoVersion": "go1.13",
 	"GodepVersion": "v80",
 	"Packages": [
-		"./..."
+		"./src/github.com/kansiree/go-api"
 	],
 	"Deps": []
 }
