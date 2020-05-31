@@ -1,9 +1,7 @@
 {
-	"ImportPath": ".",
+	"ImportPath": "github.com/kansiree/go-api",
 	"GoVersion": "go1.13",
 	"GodepVersion": "v80",
-	"Packages": [
-		"./"
-	],
+	"Packages": [],
 	"Deps": []
 }
