@@ -3,5 +3,10 @@
 	"GoVersion": "go1.13",
 	"GodepVersion": "v80",
 	"Packages": [],
-	"Deps": []
+	"Deps": [
+		{
+			"ImportPath": "github.com/go-sql-driver/mysql  ",
+			"Rev": "8ecd01ec035e29915aa6897a3385ee4f8d80cc05"
+		}
+	]
 }
