@@ -5,8 +5,6 @@
 	"Packages": [],
 	"Deps": [
 		{
-			"ImportPath": "github.com/go-sql-driver/mysql  ",
-			"Rev": "8ecd01ec035e29915aa6897a3385ee4f8d80cc05"
-		}
+			"ImportPath": "github.com/go-sql-driver/mysql  "		}
 	]
 }
