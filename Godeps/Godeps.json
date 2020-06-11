@@ -3,11 +3,7 @@
   "GoVersion": "go1.13",
   "GodepVersion": "v80",
   "Deps": [
-    {
-    "ImportPath": "github.com/go-sql-driver/mysql",
-    "Comment": "v1.5.0-28-gd0a5481",
-    "Rev": "12508c83901b1a418e3dea51850f956f32506f4e"
-    },
+  
     {
       "ImportPath": "code.google.com/p/go-netrc/netrc",
       "Rev": "28676070ab99"
