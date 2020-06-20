@@ -23,29 +23,68 @@ func main() {
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Welcome to the HomePage!")
+	fmt.Fprint(w, "Welcome to the  !")
 }
 func handleRequest() {
 	http.HandleFunc("/", homePage)
-	http.HandleFunc("/getAddress", getAddressBookAll)
+	http.HandleFunc("/getMasterSystem", getMasterSystem)
+	http.HandleFunc("/getMasterAircraft", getMasterAircraft)
+	http.HandleFunc("/getMasterTechnicalOrder", getMasterTechnicalOrder)
 	http.ListenAndServe(getPort(), nil)
 }
 
-func getAddressBookAll(w http.ResponseWriter, r *http.Request) {
+func getMasterSystem(w http.ResponseWriter, r *http.Request) {
 
 	var masters Masterdata
 	response, err := getJSON("SELECT * FROM t016ffukzsi0y5ie.master_system")
-
-	errpare := json.Unmarshal([]byte(response), &masters)
-	if errpare != nil {
-		log.Fatalln(errpare)
-	}
 	if err != nil {
-		fmt.Println(err)
-
+		log.Fatalln(err)
 	} else {
-		json.NewEncoder(w).Encode(masters)
+		js, err := convertStringToJsonMasterdataFormat(response, masters)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
 	}
+
+}
+
+func getMasterAircraft(w http.ResponseWriter, r *http.Request) {
+
+	var masters Masterdata
+	response, err := getJSON("SELECT * FROM t016ffukzsi0y5ie.master_aircraft")
+	if err != nil {
+		log.Fatalln(err)
+	} else {
+		js, err := convertStringToJsonMasterdataFormat(response, masters)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	}
+
+}
+
+func getMasterTechnicalOrder(w http.ResponseWriter, r *http.Request) {
+
+	var masters Masterdata
+	response, err := getJSON("SELECT * FROM t016ffukzsi0y5ie.master_technical_order")
+	if err != nil {
+		log.Fatalln(err)
+	} else {
+		js, err := convertStringToJsonMasterdataFormat(response, masters)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	}
+
 }
 
 func getPort() string {
@@ -101,4 +140,17 @@ func getJSON(sqlString string) (string, error) {
 		return "", err
 	}
 	return string(jsonData), nil
+}
+
+func convertStringToJsonMasterdataFormat(message string, format Masterdata) ([]byte, error) {
+	errpare := json.Unmarshal([]byte(message), &format)
+	if errpare != nil {
+		return nil, errpare
+	} else {
+		json, err := json.Marshal(format)
+		if err != nil {
+			return nil, err
+		}
+		return json, nil
+	}
 }
