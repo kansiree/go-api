@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +17,27 @@ type Masterdata []struct {
 	FullName    string `json:"full_name"`
 	ID          string `json:"id"`
 }
+
+type Detaildata []struct {
+	ID                  string `json:"id"`
+	CreatedDate         string `json:"created_date"`
+	AircraftType        string `json:"aircraft_type"`
+	AircraftSN          string `json:"aircraft_sn"`
+	System              string `json:"system"`
+	PrimaryPilot        string `json:"primary_pilot"`
+	SecondaryPilot      string `json:"secondary_pilot"`
+	Recorder            string `json:"recorder"`
+	Trouble             string `json:"trouble"`
+	TechnicalOrder      string `json:"technical_order"`
+	TroubleShooting     string `json:"trouble_shooting"`
+	Replace             string `json:"replace"`
+	Name                string `json:"name"`
+	PartNumber          string `json:"part_number"`
+	SerailNumberRemove  string `json:"serail_number_remove"`
+	SerailNumberinstall string `json:"serail_number_install"`
+	Remark              string `json:"remark"`
+}
+
 type Masters []Masterdata
 
 func main() {
@@ -25,11 +47,14 @@ func main() {
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Welcome to the  !")
 }
+
 func handleRequest() {
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/getMasterSystem", getMasterSystem)
 	http.HandleFunc("/getMasterAircraft", getMasterAircraft)
 	http.HandleFunc("/getMasterTechnicalOrder", getMasterTechnicalOrder)
+	http.HandleFunc("/getDetail", getDetail)
+
 	http.ListenAndServe(getPort(), nil)
 }
 
@@ -40,7 +65,7 @@ func getMasterSystem(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	} else {
-		js, err := convertStringToJsonMasterdataFormat(response, masters)
+		js, err := convertStringToJsonFormat(response, masters)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -58,7 +83,7 @@ func getMasterAircraft(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	} else {
-		js, err := convertStringToJsonMasterdataFormat(response, masters)
+		js, err := convertStringToJsonFormat(response, masters)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -76,7 +101,7 @@ func getMasterTechnicalOrder(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	} else {
-		js, err := convertStringToJsonMasterdataFormat(response, masters)
+		js, err := convertStringToJsonFormat(response, masters)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -85,6 +110,48 @@ func getMasterTechnicalOrder(w http.ResponseWriter, r *http.Request) {
 		w.Write(js)
 	}
 
+}
+
+func insertDetail(w http.ResponseWriter, r *http.Request) {
+	// Read body
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	// Unmarshal
+	var msg Detaildata
+	err = json.Unmarshal(b, &msg)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	output, err := json.Marshal(msg)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	w.Header().Set("content-type", "application/json")
+	w.Write(output)
+}
+
+func getDetail(w http.ResponseWriter, r *http.Request) {
+	var dataDetail Detaildata
+	response, err := getJSON("SELECT * FROM t016ffukzsi0y5ie.maintenace_detail")
+	if err != nil {
+		log.Fatalln(err)
+	} else {
+		js, err := convertStringToDetailJsonFormat(response, dataDetail)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	}
 }
 
 func getPort() string {
@@ -142,7 +209,20 @@ func getJSON(sqlString string) (string, error) {
 	return string(jsonData), nil
 }
 
-func convertStringToJsonMasterdataFormat(message string, format Masterdata) ([]byte, error) {
+func convertStringToJsonFormat(message string, format Masterdata) ([]byte, error) {
+	errpare := json.Unmarshal([]byte(message), &format)
+	if errpare != nil {
+		return nil, errpare
+	} else {
+		json, err := json.Marshal(format)
+		if err != nil {
+			return nil, err
+		}
+		return json, nil
+	}
+}
+
+func convertStringToDetailJsonFormat(message string, format Detaildata) ([]byte, error) {
 	errpare := json.Unmarshal([]byte(message), &format)
 	if errpare != nil {
 		return nil, errpare
